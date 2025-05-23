@@ -1,14 +1,14 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const User = require("../models/User");
+const {User, Student} = require("../models/User");
 require("dotenv").config();
 
 const router = express.Router();
 
 // Generate JWT Token
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
 };
@@ -26,6 +26,14 @@ router.post("/register", async (req, res) => {
     // Hash password before saving
     const salt = await bcrypt.genSalt(10); // Generate salt
     const hashedPassword = await bcrypt.hash(password, salt); // Hash password
+
+    if(role==="" || role==="user" ){
+      const newStudent = new Student({
+        name: name
+      })
+      await newStudent.save()
+    }
+
 
     // Create new user with hashed password
     user = new User({ name, email, password: hashedPassword, role });
