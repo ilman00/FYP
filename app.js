@@ -6,9 +6,8 @@ const cors = require("cors");
 const authRoutes = require("./routes/auth");
 const mongoose = require("./config/db");
 const dashboardRoutes = require("./routes/dashboard");
-const readingScore = require("./routes/readingScoreRoute")
 const creatingStudent = require("./routes/creatingStudents")
-
+const TestData = require("./routes/TestRoute");
 // Connect to MongoDB
 
 const app = express();
@@ -24,9 +23,8 @@ require("./config/passport");
 // Register Routes
 app.use(authRoutes);
 app.use(dashboardRoutes);
-app.use("/api",readingScore);
 app.use(creatingStudent)
-
+app.use(TestData)
 // Global Error Handler (Optional)
 app.use((err, req, res, next) => {
   console.error(err.stack);
