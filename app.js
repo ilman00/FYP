@@ -10,6 +10,7 @@ const creatingStudent = require("./routes/creatingStudents")
 const TestData = require("./routes/TestRoute");
 const adminDashboard = require("./routes/adminDahsboardRoute");
 const adminTestResults = require("./routes/adminTestResults")
+const childTestResult = require("./routes/childTestRoute")
 // Connect to MongoDB
 
 const app = express();
@@ -29,6 +30,7 @@ app.use(creatingStudent)
 app.use(TestData)
 app.use(adminDashboard)
 app.use(adminTestResults)
+app.use(childTestResult)
 // Global Error Handler (Optional)
 app.use((err, req, res, next) => {
   console.error(err.stack);
