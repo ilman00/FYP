@@ -8,6 +8,8 @@ const mongoose = require("./config/db");
 const dashboardRoutes = require("./routes/dashboard");
 const creatingStudent = require("./routes/creatingStudents")
 const TestData = require("./routes/TestRoute");
+const adminDashboard = require("./routes/adminDahsboardRoute");
+const adminTestResults = require("./routes/adminTestResults")
 // Connect to MongoDB
 
 const app = express();
@@ -25,6 +27,8 @@ app.use(authRoutes);
 app.use(dashboardRoutes);
 app.use(creatingStudent)
 app.use(TestData)
+app.use(adminDashboard)
+app.use(adminTestResults)
 // Global Error Handler (Optional)
 app.use((err, req, res, next) => {
   console.error(err.stack);
