@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware'); // assumes JWT or session auth
 const ChildTestResult = require('../models/childTestResult'); // your MongoDB model
-const predictChildDyslexia = require('../ml/predictChildDyslexia'); // function to call Python model
+const predictChildTest = require('../ml/predictChildTest'); // function to call Python model
 
 router.post('/submit-child-test', authMiddleware, async (req, res) => {
   try {
     const { studentId, age, tasks, diagnosedDyslexic } = req.body;
 
     // ✅ Basic field validation
+    console.log(studentId, age, tasks, diagnosedDyslexic);
     if (!studentId || !age || !tasks || typeof tasks !== 'object') {
       return res.status(400).json({
         success: false,
@@ -34,7 +35,8 @@ router.post('/submit-child-test', authMiddleware, async (req, res) => {
     // ✅ If guardian did not label, send to Python AI model
     if (finalDiagnosis === undefined || finalDiagnosis === null) {
       try {
-        finalDiagnosis = await predictChildDyslexia({
+        finalDiagnosis = await predictChildTest({
+
           age,
           ...tasks
         });

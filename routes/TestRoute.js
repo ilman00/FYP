@@ -1,53 +1,110 @@
-const express = require('express');
-const router = express.Router();
-const TestResult = require('../models/ModelParameters');
-const authMiddleware = require('../middlewares/authMiddleware'); // gets req.user
+const express = require("express")
+const ModelParameter = require("../models/ModelParameters")
+const authMiddelware = require("../middlewares/authMiddleware")
+const modelPrediction = require("../ml/modelPrediction")
 
-router.post('/submit', authMiddleware, async (req, res) => {
+const router = express.Router()
+
+
+router.post("/submit", authMiddelware, async (req, res) => {
   try {
-    const {
-      studentId,
-      reading,
-      writing,
-      letterReversal,
-      attentionSpan,
-      diagnosedDyslexic // optional
-    } = req.body;
+    const data = req.body;
+    let prediction
 
-    // ✅ Basic validation
-    if (!studentId || !reading || !writing || !letterReversal || !attentionSpan) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields: studentId, reading, writing, letterReversal, or attentionSpan'
-      });
+    if (data.diagnosedDyslexic === undefined || data.diagnosedDyslexic === null) {
+      const predictionPayload = {
+        age: data.age,
+        phonemeMatching_score: data.phonemeMatching?.score,
+        phonemeMatching_time: data.phonemeMatching?.time,
+        phonemeMatching_errorsCount: data.phonemeMatching?.errors,
+
+        letterRecognition_score: data.letterRecognition?.score,
+        letterRecognition_time: data.letterRecognition?.time,
+        letterRecognition_errorsCount: data.letterRecognition?.errors,
+
+        attention_score: data.attention?.score,
+        attention_time: data.attention?.time,
+        attention_errorsCount: data.attention?.errors,
+
+        patternMemory_score: data.patternMemory?.score,
+        patternMemory_time: data.patternMemory?.time,
+        patternMemory_errorsCount: data.patternMemory?.errors,
+
+        readingFluency: data.readingFluency,
+        readingComprehensionScore: data.readingComprehensionScore,
+        spellingAccuracy: data.spellingAccuracy,
+        sightWordRecognitionScore: data.sightWordRecognitionScore,
+        phonemeDeletionScore: data.phonemeDeletionScore,
+        rhymingScore: data.rhymingScore,
+        syllableSegmentationScore: data.syllableSegmentationScore,
+        nonWordReadingScore: data.nonWordReadingScore,
+
+        letterReversalCount: data.letterReversalCount,
+        ageStartedReading: data.ageStartedReading,
+        familyHistoryOfDyslexia: data.familyHistoryOfDyslexia
+      };
+
+
+      prediction = await modelPrediction(predictionPayload);
+      data.diagnosedByModel = prediction; // e.g. 0 or 1
+
     }
 
-    // ✅ Create a new TestResult document
-    const newTest = new TestResult({
-      student: studentId,
-      guardian: req.user.id, // assuming req.user comes from auth middleware
-      reading,
-      writing,
-      letterReversal,
-      attentionSpan,
-      diagnosedDyslexic // optional field
+    const result = new ModelParameter({
+      student: data.student,
+      guardian: req.user.id,
+      age: data.age,
+
+      phonemeMatching: {
+        score: data.phonemeMatching?.score,
+        time: data.phonemeMatching?.time,
+        errors: data.phonemeMatching?.errors
+      },
+      letterRecognition: {
+        score: data.letterRecognition?.score,
+        time: data.letterRecognition?.time,
+        errors: data.letterRecognition?.errors
+      },
+      attention: {
+        score: data.attention?.score,
+        time: data.attention?.time,
+        errors: data.attention?.errors
+      },
+      patternMemory: {
+        score: data.patternMemory?.score,
+        time: data.patternMemory?.time,
+        errors: data.patternMemory?.errors
+      },
+
+      // English-specific features
+      readingFluency: data.readingFluency,
+      readingComprehensionScore: data.readingComprehensionScore,
+      spellingAccuracy: data.spellingAccuracy,
+      sightWordRecognitionScore: data.sightWordRecognitionScore,
+      phonemeDeletionScore: data.phonemeDeletionScore,
+      rhymingScore: data.rhymingScore,
+      syllableSegmentationScore: data.syllableSegmentationScore,
+      nonWordReadingScore: data.nonWordReadingScore,
+
+      // Error patterns and behavioral
+      letterReversalCount: data.letterReversalCount,
+      ageStartedReading: data.ageStartedReading,
+      familyHistoryOfDyslexia: data.familyHistoryOfDyslexia,
+
+      // Diagnosis
+      diagnosedDyslexic: data.diagnosedDyslexic ?? prediction,
+      diagnosedByModel: data.diagnosedByModel ?? null
     });
 
-    await newTest.save();
+    await result.save();
 
-    return res.status(201).json({
-      success: true,
-      message: 'Test data submitted successfully',
-      data: newTest
-    });
-
+    res.status(201).json({ success: true, message: 'English test result saved', result });
   } catch (err) {
-    console.error('Error saving test:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error while saving test data'
-    });
+    console.error('Error in English test API:', err);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: err });
   }
-});
 
-module.exports = router;
+
+})
+
+module.exports = router

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const taskSchema = new mongoose.Schema({
   score: Number,
   time: Number,
-  errors: Number
+  errorsCount: Number
 }, { _id: false });
 
 const childTestResultSchema = new mongoose.Schema({

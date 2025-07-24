@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
-const TestSchema = new mongoose.Schema({
+const EnglishTestResultSchema = new mongoose.Schema({
   student: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Student',
+    ref: 'User', // or 'Student' if you're using a separate Student model
     required: true
   },
   guardian: {
@@ -11,34 +11,58 @@ const TestSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  age: {
+    type: Number,
+    required: true
+  },
 
-  // Reading Test
-  reading: {
-    time: Number,       // in seconds
+  // Core cognitive tasks (already in non-English model)
+  phonemeMatching: {
     score: Number,
-    errors: Number
+    time: Number,
+    errorsCount: Number
+  },
+  letterRecognition: {
+    score: Number,
+    time: Number,
+    errorsCount: Number
+  },
+  attention: {
+    score: Number,
+    time: Number,
+    errorsCount: Number
+  },
+  patternMemory: {
+    score: Number,
+    time: Number,
+    errorsCount: Number
   },
 
-  // Writing Test
-  writing: {
-    score: Number
-  },
+  // English-specific language features
+  readingFluency: Number, // words per minute
+  readingComprehensionScore: Number, // percentage or out of 10
+  spellingAccuracy: Number, // percentage
+  sightWordRecognitionScore: Number, // out of N
+  phonemeDeletionScore: Number, // out of N
+  rhymingScore: Number, // out of N
+  syllableSegmentationScore: Number, // out of N
+  nonWordReadingScore: Number, // out of N
 
-  // Letter Reversal Test
-  letterReversal: {
-    count: Number
-  },
+  // Error patterns
+  letterReversalCount: Number,
 
-  // Attention Span Test
-  attentionSpan: {
-    duration: Number,      // seconds
-    distractions: Number
-  },
+  // Behavioral/metadata
+  ageStartedReading: Number,
+  familyHistoryOfDyslexia: Boolean,
 
-  // Optional Dyslexia Label by Guardian
+  // Diagnosis
+  diagnosedByModel: {
+    type: Boolean,
+    default: null // null = not yet predicted
+  },
   diagnosedDyslexic: {
-    type: Boolean, // true (yes), false (no), undefined (not specified)
-    default: undefined
+    type: Boolean,
+    default: null // manual label from admin/guardian
   },
 
   testDate: {
@@ -47,4 +71,4 @@ const TestSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('TestResult', TestSchema);
+module.exports = mongoose.model('EnglishTestResult', EnglishTestResultSchema);

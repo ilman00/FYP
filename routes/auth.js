@@ -17,7 +17,7 @@ const generateToken = (user) => {
 
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, age } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Missing required fields." });
@@ -30,7 +30,7 @@ router.post("/register", async (req, res) => {
     let existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-    const user = new User({ name, email, password, role }); // password auto-hashed
+    const user = new User({ name, email, password, role, age }); // password auto-hashed
     await user.save();
 
     if (role === "user") {
