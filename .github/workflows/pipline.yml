@@ -1,34 +1,35 @@
-name: Deploy Node.js App to AWS
+name: Deploy Node.js App to AWS EC2
 
 on:
   push:
     branches:
-      - master  # or your deployment branch
+      - main  # or your deployment branch
 
 jobs:
   deploy:
-    name: Deploy via SSH
+    name: Deploy Node.js app
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up SSH
+      - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
 
-      - name: Copy Node.js code to EC2
+      - name: Copy Node.js code to EC2 using rsync
         run: |
           rsync -avz --delete \
             --exclude ".git" \
             --exclude "node_modules" \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             ./ ubuntu@3.108.65.38:/home/ubuntu/node-app
 
-      - name: Restart Node.js app via SSH
+      - name: Install dependencies and restart app on EC2
         run: |
-          ssh ubuntu@3.108.65.38 << 'EOF'
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@3.108.65.38 << 'EOF'
             cd /home/ubuntu/node-app
             npm install
             pm2 restart app || pm2 start app.js --name app
