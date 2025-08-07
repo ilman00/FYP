@@ -11,6 +11,7 @@ const TestData = require("./routes/TestRoute");
 const adminDashboard = require("./routes/adminDahsboardRoute");
 const adminTestResults = require("./routes/adminTestResults")
 const childTestResult = require("./routes/childTestRoute")
+const studentData = require("./routes/studentData")
 // Connect to MongoDB
 
 const app = express();
@@ -30,6 +31,7 @@ app.use(creatingStudent)
 app.use(TestData)
 app.use(adminDashboard)
 app.use(adminTestResults)
+app.use(studentData)
 app.use(childTestResult)
 // Global Error Handler (Optional)
 app.use((err, req, res, next) => {
@@ -38,4 +40,4 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0',() => console.log(`Server running on port ${PORT}`));
