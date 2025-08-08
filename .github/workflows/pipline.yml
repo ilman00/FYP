@@ -1,36 +1,58 @@
-name: Deploy Node.js App to AWS EC2
+name: Deploy to EC2 (Per Branch)
 
 on:
   push:
     branches:
-      - master  # or your deployment branch
+      - main
 
 jobs:
   deploy:
-    name: Deploy Node.js app
+    name: Deploy branch to EC2
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
+    - name: Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.AWS_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H 13.232.124.239 >> ~/.ssh/known_hosts
 
-      - name: Copy Node.js code to EC2 using rsync
-        run: |
-          rsync -avz --delete \
-            --exclude ".git" \
-            --exclude "node_modules" \
-            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
-            ./ ubuntu@13.232.124.239:/home/ubuntu/node-app
+    - name: Sync branch code to EC2
+      run: |
+        BRANCH_NAME=${GITHUB_REF##*/}
+        TARGET_DIR="/home/ubuntu/app/$BRANCH_NAME"
 
-      - name: Install dependencies and restart app on EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@13.232.124.239 << 'EOF'
-            cd /home/ubuntu/node-app
+        rsync -avz --delete \
+          --exclude '.git*' \
+          ./ ubuntu@13.232.124.239:$TARGET_DIR
+
+    - name: Install dependencies & launch service
+      run: |
+        BRANCH_NAME=${GITHUB_REF##*/}
+        TARGET_DIR="/home/ubuntu/app/$BRANCH_NAME"
+        LOG_DIR="$TARGET_DIR/logs"
+
+        ssh -i ~/.ssh/id_rsa ubuntu@13.232.124.239 << EOF
+          set -e
+          mkdir -p "$LOG_DIR"
+          cd "$TARGET_DIR"
+
+          if [ -f package.json ]; then
+            echo "→ Installing npm packages for $BRANCH_NAME"
             npm install
-            pm2 restart app || pm2 start app.js --name app
-          EOF
+
+            echo "→ Restarting service using PM2"
+            pm2 delete "$BRANCH_NAME" || true
+            pm2 start npm --name "$BRANCH_NAME" -- run dev --watch
+            pm2 save
+
+            echo "→ Service '$BRANCH_NAME' is running via PM2"
+            pm2 status
+          else
+            echo "⚠️ No package.json found in $TARGET_DIR"
+          fi
+        EOF
