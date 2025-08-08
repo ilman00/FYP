@@ -25,11 +25,11 @@ jobs:
             --exclude ".git" \
             --exclude "node_modules" \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
-            ./ ubuntu@3.108.65.38:/home/ubuntu/node-app
+            ./ ubuntu@13.232.124.239:/home/ubuntu/node-app
 
       - name: Install dependencies and restart app on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@3.108.65.38 << 'EOF'
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@13.232.124.239 << 'EOF'
             cd /home/ubuntu/node-app
             npm install
             pm2 restart app || pm2 start app.js --name app

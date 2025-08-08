@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = async function predictChildTest({ age, phonemeMatching, letterRecognition, attention, patternMemory }) {
   try {
-    const response = await axios.post('http://3.108.65.38:8000/predict-child-test', {
+    const response = await axios.post('http://13.232.124.239:8000/predict-child-test', {
       age,
       phonemeMatching_score: phonemeMatching.score,
       phonemeMatching_time: phonemeMatching.time,
