@@ -7,7 +7,5 @@ mongoose.connect(process.env.MONGO_URL)
   process.exit(1);
 });
 
-console.log("🌍 MongoDB URL:", process.env.MONGO_URL);
-
 module.exports = mongoose;
 

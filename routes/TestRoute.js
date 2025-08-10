@@ -5,12 +5,12 @@ const modelPrediction = require("../ml/modelPrediction")
 
 const router = express.Router()
 
-
-router.post("/submit", authMiddelware, async (req, res) => {
+router.post("/submit-english-speaker-test", authMiddelware, async (req, res) => {
   try {
     const data = req.body;
-    let prediction
+    let prediction;
 
+    // Prepare payload only if no manual label is provided
     if (data.diagnosedDyslexic === undefined || data.diagnosedDyslexic === null) {
       const predictionPayload = {
         age: data.age,
@@ -44,15 +44,26 @@ router.post("/submit", authMiddelware, async (req, res) => {
         familyHistoryOfDyslexia: data.familyHistoryOfDyslexia
       };
 
-
       prediction = await modelPrediction(predictionPayload);
-      data.diagnosedByModel = prediction; // e.g. 0 or 1
+      data.diagnosedByModel = prediction; // model’s 0/1 prediction
+    }
 
+    // Determine student/guardian IDs based on role
+    let studentId, guardianId;
+
+    if (req.user.role === "guardian") {
+      // Guardian is submitting test for a student (student ID comes from request)
+      studentId = data.student;
+      guardianId = req.user.id;
+    } else {
+      // Regular user is taking their own test
+      studentId = req.user.id;
+      guardianId = null;
     }
 
     const result = new ModelParameter({
-      student: data.student,
-      guardian: req.user.id,
+      student: studentId,
+      guardian: guardianId,
       age: data.age,
 
       phonemeMatching: {
@@ -76,7 +87,6 @@ router.post("/submit", authMiddelware, async (req, res) => {
         errors: data.patternMemory?.errors
       },
 
-      // English-specific features
       readingFluency: data.readingFluency,
       readingComprehensionScore: data.readingComprehensionScore,
       spellingAccuracy: data.spellingAccuracy,
@@ -86,25 +96,27 @@ router.post("/submit", authMiddelware, async (req, res) => {
       syllableSegmentationScore: data.syllableSegmentationScore,
       nonWordReadingScore: data.nonWordReadingScore,
 
-      // Error patterns and behavioral
       letterReversalCount: data.letterReversalCount,
       ageStartedReading: data.ageStartedReading,
       familyHistoryOfDyslexia: data.familyHistoryOfDyslexia,
 
-      // Diagnosis
       diagnosedDyslexic: data.diagnosedDyslexic ?? prediction,
       diagnosedByModel: data.diagnosedByModel ?? null
     });
 
     await result.save();
 
-    res.status(201).json({ success: true, message: 'English test result saved', result });
+    res.status(201).json({
+      success: true,
+      message: 'English test result saved',
+      result
+    });
+
   } catch (err) {
     console.error('Error in English test API:', err);
-    res.status(500).json({ success: false, message: 'Internal Server Error', error: err });
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: err.message });
   }
+});
 
-
-})
 
 module.exports = router

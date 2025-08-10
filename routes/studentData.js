@@ -5,7 +5,7 @@ const EnglishSpeaker = require('../models/ModelParameters');
 const nonEnglishSpeaker = require("../models/childTestResult")
 const authMiddleware = require('../middlewares/authMiddleware');
 
-router.get('/students/:id/test-results', authMiddleware, async (req, res) => {
+router.get('/student/:id/test-results', authMiddleware, async (req, res) => {
   try {
     const studentId = req.params.id;
     const guardianId = req.user._id;

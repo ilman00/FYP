@@ -4,9 +4,10 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { Student } = require("../models/User");
 
 // Guardian creates a new student
-router.post("/students", authMiddleware, async (req, res) => {
+router.post("/create-student", authMiddleware, async (req, res) => {
     try {
         const user = req.user;
+        console.log("Loged In User: ", req.user);
 
         // Only guardians can create students
         if (user.role !== "guardian") {
@@ -18,7 +19,7 @@ router.post("/students", authMiddleware, async (req, res) => {
             age: req.body.age,
             gender: req.body.gender,
             parent_history_dyslexia: req.body.parent_history_dyslexia,
-            guardian: user._id // Fix the field name
+            guardian: user.id // Fix the field name
         });
 
         await newStudent.save();

@@ -12,6 +12,7 @@ const adminDashboard = require("./routes/adminDahsboardRoute");
 const adminTestResults = require("./routes/adminTestResults")
 const childTestResult = require("./routes/childTestRoute")
 const studentData = require("./routes/studentData")
+const allStudents = require("./routes/guardianRoute")
 // Connect to MongoDB
 
 const app = express();
@@ -33,6 +34,7 @@ app.use(adminDashboard)
 app.use(adminTestResults)
 app.use(studentData)
 app.use(childTestResult)
+app.use(allStudents)
 // Global Error Handler (Optional)
 app.use((err, req, res, next) => {
   console.error(err.stack);

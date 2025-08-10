@@ -21,6 +21,8 @@ module.exports = async function predictChildTest({ age, phonemeMatching, letterR
       patternMemory_errors: patternMemory.errors
     });
 
+    console.log("Model Prediction: ", response.data.prediction);
+
     return response.data.prediction;
   } catch (error) {
     console.error('Prediction model error:', error);

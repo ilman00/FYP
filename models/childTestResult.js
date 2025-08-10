@@ -8,7 +8,7 @@ const taskSchema = new mongoose.Schema({
 
 const childTestResultSchema = new mongoose.Schema({
   student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  guardian: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  guardian: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
   age: Number,
   tasks: {
     phonemeMatching: taskSchema,
