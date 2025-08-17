@@ -9,15 +9,15 @@ router.get("/students", isAuthenticated, async (req, res) => {
     const user = req.user;
 
     if (user.role !== "guardian") {
-      return res.status(403).json({ message: "Only guardians can view student list" });
+      return res.status(403).json({status:403, message: "Only guardians can view student list" });
     }
 
     const students = await Student.find({ guardian: user.id });
 
-    res.status(200).json({ students });
+    res.status(200).json({status: 200, students });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Something went wrong!" });
+    res.status(500).json({status: 500, message: "Something went wrong!" });
   }
 });
 

@@ -12,6 +12,7 @@ router.post('/submit-child-test', authMiddleware, async (req, res) => {
     console.log(studentId, age, tasks, diagnosedDyslexic);
     if (!studentId || !age || !tasks || typeof tasks !== 'object') {
       return res.status(400).json({
+        status: 400,
         success: false,
         message: 'Missing or invalid fields: studentId, age, or tasks'
       });
@@ -24,6 +25,7 @@ router.post('/submit-child-test', authMiddleware, async (req, res) => {
       const task = tasks[taskName];
       if (!task || typeof task.score !== 'number' || typeof task.time !== 'number' || typeof task.errors !== 'number') {
         return res.status(400).json({
+          status: 400,
           success: false,
           message: `Missing or invalid fields in task: ${taskName}`
         });
@@ -43,6 +45,7 @@ router.post('/submit-child-test', authMiddleware, async (req, res) => {
       } catch (err) {
         console.error('Prediction model error:', err);
         return res.status(500).json({
+          status: 500,
           success: false,
           message: 'Failed to get prediction from AI model'
         });
@@ -62,6 +65,7 @@ router.post('/submit-child-test', authMiddleware, async (req, res) => {
     await newTest.save();
 
     return res.status(201).json({
+      status: 201,
       success: true,
       message: 'Child test submitted successfully',
       data: newTest
@@ -70,6 +74,7 @@ router.post('/submit-child-test', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Error saving child test:', err);
     return res.status(500).json({
+      status: 500,
       success: false,
       message: 'Internal server error'
     });

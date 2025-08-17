@@ -4,15 +4,12 @@ const bcrypt = require("bcryptjs");
 const { User, Student } = require("../models/User");
 const nodemailer = require("nodemailer")
 require("dotenv").config();
+const { generateAccessToken, generateRefreshToken } = require("../utils/jwt");
+const {forgotPassword} = require("../controllers/authController")
+const {verifyOTP} = require("../controllers/verifyOTP")
+const { resetPassword } = require("../controllers/resetPassword")
 
 const router = express.Router();
-
-// Generate JWT Token
-const generateToken = (user) => {
-  return jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
-};
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -104,14 +101,17 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ status: 400, message: "Invalid credentials" });
+    if (!user) {
+      return res.status(400).json({ status: 400, message: "Invalid credentials" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ status: 400, message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(400).json({ status: 400, message: "Invalid credentials" });
+    }
 
-    // 🔹 Check if email is verified
+    // Check if email is verified
     if (!user.isVerified) {
-      // Generate new verification token
       const verifyToken = jwt.sign(
         { userId: user._id },
         process.env.JWT_SECRET,
@@ -120,7 +120,6 @@ router.post("/login", async (req, res) => {
 
       const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${verifyToken}`;
 
-      // Send verification email
       await transporter.sendMail({
         from: `"My FYP App" <${process.env.EMAIL_USER}>`,
         to: user.email,
@@ -139,14 +138,25 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // 🔹 Email verified — proceed with login
-    const token = generateToken(user);
-    res.json({ status: 201, token, user: { id: user._id, name: user.name, role: user.role } });
+    // ✅ Only one token
+    const token = generateAccessToken(user);
+
+    res.json({
+      status: 200,
+      token,
+      user: { id: user._id, name: user.name, role: user.role }
+    });
 
   } catch (error) {
-    console.error("Error in login route:", error);
-    res.status(500).json({ status: 500, message: "Server error", error });
+    console.error("Login error:", error);
+    res.status(500).json({ status: 500, message: "Server error" });
   }
 });
+
+
+router.post("/auth/forgot-password", forgotPassword);
+router.post("/auth/resend-otp", forgotPassword);
+router.post("/auth/verify-otp", verifyOTP)
+router.post("/auth/reset-password", resetPassword)
 
 module.exports = router;

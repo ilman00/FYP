@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const EnglishTestResultSchema = new mongoose.Schema({
   student: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // or 'Student' if you're using a separate Student model
+    ref: 'User', // or 'Student' if using separate model
     required: true
   },
   guardian: {
@@ -14,8 +14,6 @@ const EnglishTestResultSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-
-  // Core cognitive tasks (already in non-English model)
   phonemeMatching: {
     score: Number,
     time: Number,
@@ -36,25 +34,18 @@ const EnglishTestResultSchema = new mongoose.Schema({
     time: Number,
     errorsCount: Number
   },
-
-  // English-specific language features
-  readingFluency: Number, // words per minute
-  readingComprehensionScore: Number, // percentage or out of 10
-  spellingAccuracy: Number, // percentage
-  sightWordRecognitionScore: Number, // out of N
-  phonemeDeletionScore: Number, // out of N
-  rhymingScore: Number, // out of N
-  syllableSegmentationScore: Number, // out of N
-  nonWordReadingScore: Number, // out of N
-
-  // Error patterns
+  reading: {
+    pronunciationAccuracy: Number, // %
+    readingSpeedWpm: Number,       // words per minute
+    timeTaken: Number,             // seconds
+    totalErrors: Number,
+    wrongWords: Number,
+    totalScore: Number,            // out of N
+    readingFluency: Number         // score out of N
+  },
   letterReversalCount: Number,
-
-  // Behavioral/metadata
   ageStartedReading: Number,
   familyHistoryOfDyslexia: Boolean,
-
-  // Diagnosis
   diagnosedByModel: {
     type: Boolean,
     default: null // null = not yet predicted

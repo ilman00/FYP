@@ -24,10 +24,10 @@ router.post("/create-student", authMiddleware, async (req, res) => {
 
         await newStudent.save();
 
-        res.status(201).json({ message: "Student created successfully", student: newStudent });
+        res.status(201).json({status:201, message: "Student created successfully", student: newStudent });
     } catch (error) {
         console.error("Student creation failed:", error);
-        res.status(400).json({ error: "Failed to create student", details: error.message });
+        res.status(500).json({ status: 500, error: "Failed to create student", details: error.message });
     }
 });
 
