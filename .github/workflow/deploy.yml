@@ -1,0 +1,44 @@
+name: Deploy Node API
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            cd /home/ubuntu/FYP
+
+            echo "Cleaning folder except .env"
+            find . -mindepth 1 ! -name ".env" ! -name "." -exec rm -rf {} +
+
+            echo "Cloning latest repo"
+            git clone https://github.com/ilman00/FYP.git .
+
+            echo "Installing dependencies"
+            npm install
+
+            echo "Restarting PM2"
+            pm2 restart node_api || pm2 start app.js --name node_api

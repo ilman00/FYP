@@ -12,7 +12,7 @@ const adminDashboard = require("./routes/adminDahsboardRoute");
 const adminTestResults = require("./routes/adminTestResults")
 const childTestResult = require("./routes/childTestRoute")
 const studentData = require("./routes/studentData")
-const guaridanRoute = require("./routes/guardianRoute")
+const guardianRoute = require("./routes/guardianRoute")
 // Connect to MongoDB
 
 const app = express();
@@ -26,15 +26,15 @@ app.use(passport.initialize());
 require("./config/passport");
 
 // Register Routes
-app.use(authRoutes);
-app.use(dashboardRoutes);
-app.use(creatingStudent)
-app.use(TestData)
-app.use(adminDashboard)
-app.use(adminTestResults)
-app.use(studentData)
-app.use(childTestResult)
-app.use(guaridanRoute)
+app.use("/api",authRoutes);
+app.use("/api",dashboardRoutes);
+app.use("/api",creatingStudent)
+app.use("/api",TestData)
+app.use("/api",adminDashboard)
+app.use("/api",adminTestResults)
+app.use("/api",studentData)
+app.use("/api",childTestResult)
+app.use("/api",guardianRoute)
 // Global Error Handler (Optional)
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -18,7 +18,7 @@ router.post("/students", authMiddleware, async (req, res) => {
             age: req.body.age,
             gender: req.body.gender,
             parent_history_dyslexia: req.body.parent_history_dyslexia,
-            guardian: user._id // Fix the field name
+            guardian: user.id // Fix the field name
         });
 
         await newStudent.save();
