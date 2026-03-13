@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node
@@ -27,15 +27,17 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-
           script: |
             cd /home/ubuntu/FYP
 
-            echo "Cleaning folder except .env"
-            find . -mindepth 1 ! -name ".env" ! -name "." -exec rm -rf {} +
+            echo "Resetting repository"
+            git reset --hard
 
-            echo "Cloning latest repo"
-            git clone https://github.com/ilman00/FYP.git .
+            echo "Cleaning untracked files (except .env)"
+            git clean -fd -e .env
+
+            echo "Pulling latest code"
+            git pull origin master
 
             echo "Installing dependencies"
             npm install
